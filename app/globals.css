@@ -1,8 +1,14 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: light;
+  --background: #fafaf7;
+  --foreground: #1c1917;
+  --grain-primary: #c4783c;
+  --grain-primary-dark: #a8622e;
+  --grain-primary-light: #fef3e8;
+  --grain-primary-border: #f0c49a;
 }
 
 @theme inline {
@@ -12,15 +18,10 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  overflow-y: scroll;
 }
