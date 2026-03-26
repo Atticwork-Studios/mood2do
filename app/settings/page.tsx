@@ -157,29 +157,44 @@ export default function SettingsPage() {
       <main className="w-full max-w-5xl mx-auto px-8 py-8">
         <h1 className="text-2xl font-bold text-gray-900 mb-8">Settings</h1>
 
-        <div className="flex flex-col gap-6 max-w-2xl">
+        <div className="flex flex-col gap-6">
 
-          {/* Plan */}
-          <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
-            <h2 className="font-semibold text-gray-900 mb-1">Your plan</h2>
-            <p className="text-sm text-gray-500 mb-4">
-              {plan === 'pro'
-                ? 'You are on the Pro plan — unlimited tasks and full insights.'
-                : 'You are on the Free plan — up to 25 tasks.'}
-            </p>
-            {plan === 'free' && (
+          {/* Plan + Help row */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+              <h2 className="font-semibold text-gray-900 mb-1">Your plan</h2>
+              <p className="text-sm text-gray-500 mb-4">
+                {plan === 'pro'
+                  ? 'You are on the Pro plan — unlimited tasks and full insights.'
+                  : 'You are on the Free plan — up to 25 tasks.'}
+              </p>
+              {plan === 'free' && (
+                <a
+                  href="/pricing"
+                  className="inline-block bg-indigo-600 text-white px-5 py-2 rounded-lg text-sm font-semibold hover:bg-indigo-700"
+                >
+                  Upgrade to Pro →
+                </a>
+              )}
+              {plan === 'pro' && (
+                <span className="inline-block bg-green-50 text-green-700 border border-green-200 px-4 py-1.5 rounded-lg text-sm font-semibold">
+                  ✓ Pro
+                </span>
+              )}
+            </div>
+
+            <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+              <h2 className="font-semibold text-gray-900 mb-1">Help &amp; Resources</h2>
+              <p className="text-sm text-gray-500 mb-4">Guides, tips, and walkthroughs for getting the most out of Mood2do.</p>
               <a
-                href="/pricing"
+                href="/resources"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="inline-block bg-indigo-600 text-white px-5 py-2 rounded-lg text-sm font-semibold hover:bg-indigo-700"
               >
-                Upgrade to Pro →
+                Open Help →
               </a>
-            )}
-            {plan === 'pro' && (
-              <span className="inline-block bg-green-50 text-green-700 border border-green-200 px-4 py-1.5 rounded-lg text-sm font-semibold">
-                ✓ Pro
-              </span>
-            )}
+            </div>
           </div>
 
           {/* Profile */}

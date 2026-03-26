@@ -1,9 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import HCaptcha from '@hcaptcha/react-hcaptcha'
 import { createClient } from '@/lib/supabase/client'
+
+const HCAPTCHA_SITE_KEY = '38145146-51e8-4ac4-81e6-17fc3938c6ca'
 
 export default function SignUpPage() {
   const router = useRouter()
@@ -11,13 +14,20 @@ export default function SignUpPage() {
   const [password, setPassword] = useState('')
   const [termsAccepted, setTermsAccepted] = useState(false)
   const [marketingConsent, setMarketingConsent] = useState(false)
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const captchaRef = useRef<HCaptcha>(null)
 
   async function handleSignUp(e: React.FormEvent) {
     e.preventDefault()
     if (!termsAccepted) {
       setError('Please accept the Terms and Conditions to continue.')
+      return
+    }
+    const isLocalhost = window.location.hostname === 'localhost'
+    if (!isLocalhost && !captchaToken) {
+      setError('Please complete the CAPTCHA check.')
       return
     }
     setLoading(true)
@@ -29,8 +39,10 @@ export default function SignUpPage() {
       password,
       options: {
         emailRedirectTo: `${window.location.origin}/auth/callback`,
+        ...(captchaToken ? { captchaToken } : {}),
       },
     })
+    captchaRef.current?.resetCaptcha()
 
     if (data.user || (error?.message ?? '').toLowerCase().includes('sending confirmation email')) {
       // Save consent flags to profile
@@ -111,6 +123,13 @@ export default function SignUpPage() {
               </span>
             </label>
           </div>
+
+          <HCaptcha
+            ref={captchaRef}
+            sitekey={HCAPTCHA_SITE_KEY}
+            onVerify={token => setCaptchaToken(token)}
+            onExpire={() => setCaptchaToken(null)}
+          />
 
           {error && <p className="text-red-500 text-sm">{error}</p>}
 

@@ -13,8 +13,10 @@ type Task = {
   title: string
   category: 'work' | 'personal'
   mood_tags: string[]
+  custom_tags: string[]
   deadline: string | null
   completed: boolean
+  important: boolean | null
   recurrence_rule: string | null
   recurrence_parent_id: string | null
   notes: string | null
@@ -47,12 +49,17 @@ export default function TasksPage() {
   const [title, setTitle] = useState('')
   const [category, setCategory] = useState<'work' | 'personal'>('work')
   const [formMoods, setFormMoods] = useState<string[]>([])
+  const [formTags, setFormTags] = useState<string[]>([])
+  const [tagInput, setTagInput] = useState('')
   const [deadline, setDeadline] = useState('')
   const [notes, setNotes] = useState('')
   const [formImportant, setFormImportant] = useState(false)
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState('')
   const [saveMessage, setSaveMessage] = useState('')
+
+  // All distinct custom tags in use across tasks (for suggestions)
+  const [filterTags, setFilterTags] = useState<string[]>([])
 
   // Recurring
   const [isRecurring, setIsRecurring] = useState(false)
@@ -113,6 +120,7 @@ export default function TasksPage() {
         title,
         category,
         mood_tags: formMoods,
+        custom_tags: formTags,
         deadline: d.toISOString().split('T')[0],
         recurrence_rule: recurrenceRule,
         recurrence_parent_id: parentId,
@@ -126,6 +134,7 @@ export default function TasksPage() {
         title,
         category,
         mood_tags: formMoods,
+        custom_tags: formTags,
         deadline: deadline || null,
         notes: notes || null,
         important: formImportant,
@@ -135,6 +144,8 @@ export default function TasksPage() {
 
     setTitle('')
     setFormMoods([])
+    setFormTags([])
+    setTagInput('')
     setDeadline('')
     setNotes('')
     setFormImportant(false)
@@ -203,6 +214,8 @@ export default function TasksPage() {
     setTitle(task.title)
     setCategory(task.category)
     setFormMoods(task.mood_tags)
+    setFormTags(task.custom_tags ?? [])
+    setTagInput('')
     setDeadline(task.deadline ?? '')
     setNotes(task.notes ?? '')
     setFormImportant(task.important ?? false)
@@ -215,9 +228,20 @@ export default function TasksPage() {
     setEditingId(null)
     setTitle('')
     setFormMoods([])
+    setFormTags([])
+    setTagInput('')
     setDeadline('')
     setNotes('')
     setSaveMessage('')
+  }
+
+  function handleTagKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault()
+      const tag = tagInput.trim().toLowerCase()
+      if (tag && !formTags.includes(tag)) setFormTags(prev => [...prev, tag])
+      setTagInput('')
+    }
   }
 
   async function handleUpdate(e: React.FormEvent) {
@@ -259,6 +283,7 @@ export default function TasksPage() {
         title,
         category,
         mood_tags: formMoods,
+        custom_tags: formTags,
         deadline: deadline || null,
         notes: notes || null,
         important: formImportant,
@@ -266,14 +291,17 @@ export default function TasksPage() {
       if (error) { setSaveError(error.message); setSaving(false); return }
     }
 
-    setSaveMessage('Saved!')
     setSaving(false)
+    closeEdit()
     loadTasks()
   }
 
   function toggleMood(mood: string) {
     setFormMoods(prev => prev.includes(mood) ? prev.filter(m => m !== mood) : [...prev, mood])
   }
+
+  // All distinct custom tags currently in use (auto-cleans when no tasks use them)
+  const allTags = Array.from(new Set(tasks.flatMap(t => t.custom_tags ?? []))).sort()
 
   const filtered = (() => {
     const today = new Date().toISOString().split('T')[0]
@@ -308,6 +336,7 @@ export default function TasksPage() {
       if (filterDeadline && !t.deadline) return false
       if (filterSnoozed && !t.snoozed_until) return false
       if (filterRepeating && !t.recurrence_parent_id) return false
+      if (filterTags.length > 0 && !filterTags.some(tag => (t.custom_tags ?? []).includes(tag))) return false
       // For recurring tasks, only show the representative instance
       if (t.recurrence_parent_id) {
         return nextPerParent.get(t.recurrence_parent_id)?.id === t.id
@@ -395,6 +424,34 @@ export default function TasksPage() {
                   </button>
                 ))}
               </div>
+            </div>
+
+            <div className="mb-3">
+              <label className="block text-sm font-semibold text-gray-800 mb-1">
+                Tags <span className="text-gray-400 font-normal">(optional)</span>
+              </label>
+              <div className="flex flex-wrap gap-1.5 mb-2">
+                {formTags.map(tag => (
+                  <span key={tag} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    {tag}
+                    <button type="button" onClick={() => setFormTags(prev => prev.filter(t => t !== tag))} className="hover:text-red-500">×</button>
+                  </span>
+                ))}
+                {allTags.filter(t => !formTags.includes(t)).map(tag => (
+                  <button key={tag} type="button" onClick={() => setFormTags(prev => [...prev, tag])}
+                    className="px-2 py-0.5 rounded-full text-xs border border-dashed border-gray-300 text-gray-400 hover:border-emerald-400 hover:text-emerald-600">
+                    + {tag}
+                  </button>
+                ))}
+              </div>
+              <input
+                type="text"
+                value={tagInput}
+                onChange={e => setTagInput(e.target.value)}
+                onKeyDown={handleTagKeyDown}
+                placeholder="Type a new tag and press Enter…"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-400"
+              />
             </div>
 
             <div className="mb-3">
@@ -564,6 +621,34 @@ export default function TasksPage() {
                   </button>
                 ))}
               </div>
+            </div>
+
+            <div className="mb-3">
+              <label className="block text-sm font-semibold text-gray-800 mb-1">
+                Tags <span className="text-gray-400 font-normal">(optional)</span>
+              </label>
+              <div className="flex flex-wrap gap-1.5 mb-2">
+                {formTags.map(tag => (
+                  <span key={tag} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    {tag}
+                    <button type="button" onClick={() => setFormTags(prev => prev.filter(t => t !== tag))} className="hover:text-red-500">×</button>
+                  </span>
+                ))}
+                {allTags.filter(t => !formTags.includes(t)).map(tag => (
+                  <button key={tag} type="button" onClick={() => setFormTags(prev => [...prev, tag])}
+                    className="px-2 py-0.5 rounded-full text-xs border border-dashed border-gray-300 text-gray-400 hover:border-emerald-400 hover:text-emerald-600">
+                    + {tag}
+                  </button>
+                ))}
+              </div>
+              <input
+                type="text"
+                value={tagInput}
+                onChange={e => setTagInput(e.target.value)}
+                onKeyDown={handleTagKeyDown}
+                placeholder="Type a new tag and press Enter…"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-400"
+              />
             </div>
 
             <div className="mb-3">
@@ -746,6 +831,20 @@ export default function TasksPage() {
               {mood}
             </button>
           ))}
+          {allTags.length > 0 && <div className="w-px bg-gray-200 mx-1" />}
+          {allTags.map(tag => (
+            <button
+              key={tag}
+              onClick={() => setFilterTags(prev => prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag])}
+              className={`px-3 py-1 rounded-full text-sm border transition-colors ${
+                filterTags.includes(tag)
+                  ? 'bg-emerald-600 text-white border-emerald-600'
+                  : 'bg-white text-gray-600 border-gray-300 hover:border-emerald-400'
+              }`}
+            >
+              {tag}
+            </button>
+          ))}
         </div>
         </div>
 
@@ -783,6 +882,9 @@ export default function TasksPage() {
                     </span>
                     {task.mood_tags.map(mood => (
                       <span key={mood} className="text-xs bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded-full">{mood}</span>
+                    ))}
+                    {(task.custom_tags ?? []).map(tag => (
+                      <span key={tag} className="text-xs bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full">{tag}</span>
                     ))}
                     {task.deadline && (
                       <span className="text-xs bg-amber-50 text-amber-700 px-2 py-0.5 rounded-full">

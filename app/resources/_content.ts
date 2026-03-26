@@ -314,6 +314,56 @@ export const articles: Article[] = [
     ],
   },
   {
+    slug: 'custom-tags',
+    title: 'Using custom tags as a traditional task manager',
+    intro: 'Mood2do is built around mood — but sometimes you just need to see all your garden tasks in one place. Custom tags let you do both.',
+    sections: [
+      {
+        heading: 'The problem with pure mood-based lists',
+        body: [
+          'Mood2do is great at surfacing the right task for how you feel right now. But sometimes you want a more traditional view — a project list, a shopping list, all your errands for Saturday.',
+          'Custom tags give you that without changing how the mood system works.',
+        ],
+      },
+      {
+        heading: 'What are custom tags?',
+        body: [
+          'Custom tags are free-text labels you add to individual tasks — things like "garden", "admin", "shed", "shopping", or "holiday prep". They\'re completely separate from mood tags and never appear in the mood picker.',
+          'You can add as many tags as you like to a task, and a task can have multiple tags — for example "garden" and "shed" on the same task.',
+        ],
+      },
+      {
+        heading: 'How to add a tag',
+        body: [
+          'When adding or editing a task, scroll to the Tags field. You\'ll see any tags you\'ve already used as clickable pills — click one to add it to the task.',
+          'To create a new tag, type it in the text box and press Enter. Tags are saved in lowercase automatically.',
+        ],
+      },
+      {
+        heading: 'Filtering by tag',
+        body: [
+          'Go to Task list. Once you have at least one tag in use, it appears as a green filter button in the filter bar — alongside the existing Work, Personal, and mood filters.',
+          'Click a tag to filter to tasks with that tag. Click multiple tags to see tasks that match any of them.',
+          'Tags disappear from the filter bar automatically when no tasks use them — so the list stays clean.',
+        ],
+      },
+      {
+        heading: 'A practical example',
+        body: [
+          'Say you\'re planning a day in the garden. You\'ve tagged several tasks with "garden" — mow the lawn, clear the shed, plant the tomatoes, fix the fence.',
+          'Open Task list, click the "garden" filter, and you have your focused gardening list for the day — no mood required.',
+        ],
+      },
+      {
+        heading: 'Tags and moods work together',
+        body: [
+          'You don\'t have to choose between mood-based and tag-based working. A task can have both mood tags and custom tags.',
+          'On a normal day, pick your mood and let Mood2do surface the right tasks. On a project day, filter by tag and work through the list. Same app, two different ways of working.',
+        ],
+      },
+    ],
+  },
+  {
     slug: 'settings',
     title: 'Settings',
     intro: 'Mood2do can be personalised to fit how your brain works. Here\'s what you can change.',
