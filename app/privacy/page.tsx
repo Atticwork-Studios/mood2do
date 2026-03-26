@@ -14,7 +14,7 @@ export default function PrivacyPage() {
           <section>
             <h2 className="text-lg font-bold text-gray-900 mb-2">Who we are</h2>
             <p className="text-gray-600">
-              Mood2do is operated by Atticwork Studios, a UK-based sole trader. Our ICO registration number is <strong>[PENDING — to be added within 2 working days]</strong>.
+              Mood2do is operated by Atticwork Studios, a UK-based sole trader. Our ICO registration number is <strong>ZC110700</strong>.
             </p>
             <p className="text-gray-600 mt-2">
               If you have any questions about this policy, contact us at{' '}
