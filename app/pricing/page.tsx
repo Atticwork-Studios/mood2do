@@ -25,8 +25,8 @@ const tiers = [
     price: '£3.99',
     period: 'per month',
     description: 'Unlimited tasks and full insights.',
-    cta: 'Get Pro',
-    href: '/sign-up',
+    cta: 'Coming soon',
+    href: null,
     highlight: true,
     features: [
       'Unlimited tasks',
@@ -41,8 +41,8 @@ const tiers = [
     price: '£39.99',
     period: 'per year',
     description: 'Best value — save £8 vs monthly.',
-    cta: 'Get Pro Annual',
-    href: '/sign-up',
+    cta: 'Coming soon',
+    href: null,
     highlight: false,
     features: [
       'Unlimited tasks',
@@ -108,15 +108,21 @@ export default function PricingPage() {
                 ))}
               </ul>
 
-              <Link
-                href={tier.href}
-                className={`text-sm font-semibold text-center py-2.5 rounded-xl transition-opacity hover:opacity-90 ${
-                  tier.highlight ? 'text-white' : 'text-gray-800 bg-white border border-gray-200 hover:bg-gray-50'
-                }`}
-                style={tier.highlight ? { background: 'var(--grain-primary)' } : {}}
-              >
-                {tier.cta}
-              </Link>
+              {tier.href ? (
+                <Link
+                  href={tier.href}
+                  className={`text-sm font-semibold text-center py-2.5 rounded-xl transition-opacity hover:opacity-90 ${
+                    tier.highlight ? 'text-white' : 'text-gray-800 bg-white border border-gray-200 hover:bg-gray-50'
+                  }`}
+                  style={tier.highlight ? { background: 'var(--grain-primary)' } : {}}
+                >
+                  {tier.cta}
+                </Link>
+              ) : (
+                <span className="text-sm font-semibold text-center py-2.5 rounded-xl bg-gray-100 text-gray-400 cursor-default">
+                  {tier.cta}
+                </span>
+              )}
             </div>
           ))}
         </div>
