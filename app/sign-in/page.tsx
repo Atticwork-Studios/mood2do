@@ -21,7 +21,6 @@ export default function SignInPage() {
 
   async function handleSignIn(e: React.FormEvent) {
     e.preventDefault()
-    setLoading(true)
     setError('')
 
     if (!isLocalhost) {
@@ -33,6 +32,7 @@ export default function SignInPage() {
   }
 
   async function doSignIn(token: string | null) {
+    setLoading(true)
     const supabase = createClient()
     const { error } = await supabase.auth.signInWithPassword({
       email,
