@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
 
     if (userId) {
       const plan = priceId === process.env.STRIPE_ANNUAL_PRICE_ID ? 'pro_annual' : 'pro_monthly'
-      await supabase
+      const { error } = await supabase
         .from('profiles')
         .update({
           plan,
@@ -35,6 +35,10 @@ export async function POST(req: NextRequest) {
           stripe_subscription_id: session.subscription as string,
         })
         .eq('id', userId)
+      if (error) console.error('Supabase update error:', error)
+      else console.log('Profile updated to', plan, 'for user', userId)
+    } else {
+      console.error('No userId in session metadata')
     }
   }
 
