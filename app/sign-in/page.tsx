@@ -1,9 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import HCaptcha from '@hcaptcha/react-hcaptcha'
 import { createClient } from '@/lib/supabase/client'
+
+const HCAPTCHA_SITE_KEY = '38145146-51e8-4ac4-81e6-17fc3938c6ca'
 
 export default function SignInPage() {
   const router = useRouter()
@@ -11,18 +14,34 @@ export default function SignInPage() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null)
+  const captchaRef = useRef<HCaptcha>(null)
+
+  const isLocalhost = typeof window !== 'undefined' && window.location.hostname === 'localhost'
 
   async function handleSignIn(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true)
     setError('')
 
+    if (!isLocalhost && !captchaToken) {
+      setError('Please complete the captcha.')
+      setLoading(false)
+      return
+    }
+
     const supabase = createClient()
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+      options: { captchaToken: captchaToken ?? undefined },
+    })
 
     if (error) {
       setError(error.message)
       setLoading(false)
+      captchaRef.current?.resetCaptcha()
+      setCaptchaToken(null)
     } else {
       router.push('/home')
     }
@@ -64,6 +83,15 @@ export default function SignInPage() {
               Forgot password?
             </Link>
           </div>
+
+          {!isLocalhost && (
+            <HCaptcha
+              sitekey={HCAPTCHA_SITE_KEY}
+              onVerify={token => setCaptchaToken(token)}
+              onExpire={() => setCaptchaToken(null)}
+              ref={captchaRef}
+            />
+          )}
 
           {error && <p className="text-red-500 text-sm">{error}</p>}
 
