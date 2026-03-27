@@ -381,7 +381,7 @@ export default function SettingsPage() {
 
         </div>
 
-        <p className="text-xs text-gray-300 mt-8 text-right">v1.0</p>
+        <p className="text-xs text-gray-400 mt-8 text-right">v1.0</p>
       </main>
     </>
   )
