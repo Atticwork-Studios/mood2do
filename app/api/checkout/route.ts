@@ -16,6 +16,7 @@ export async function POST(req: NextRequest) {
     payment_method_types: ['card'],
     customer_email: email,
     line_items: [{ price: priceId, quantity: 1 }],
+    allow_promotion_codes: true,
     success_url: `${process.env.NEXT_PUBLIC_APP_URL}/home?upgraded=true`,
     cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/pricing`,
     metadata: { userId, priceId },
