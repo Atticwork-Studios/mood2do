@@ -11,7 +11,7 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState(true)
 
   // Plan
-  const [plan, setPlan] = useState<'free' | 'pro'>('free')
+  const [plan, setPlan] = useState<string>('free')
 
   // Delete account
   const [deleteConfirm, setDeleteConfirm] = useState(false)
@@ -50,7 +50,7 @@ export default function SettingsPage() {
       if (data?.name) setName(data.name)
       if (data?.moods && data.moods.length > 0) { setSelectedMoods(data.moods); setSavedMoods(data.moods) }
       if (data?.task_count) setTaskCount(data.task_count)
-      if (data?.plan) setPlan(data.plan as 'free' | 'pro')
+      if (data?.plan) setPlan(data.plan)
       setLoading(false)
     }
     load()
@@ -164,8 +164,10 @@ export default function SettingsPage() {
             <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
               <h2 className="font-semibold text-gray-900 mb-1">Your plan</h2>
               <p className="text-sm text-gray-500 mb-4">
-                {plan === 'pro'
-                  ? 'You are on the Pro plan — unlimited tasks and full insights.'
+                {plan === 'pro_monthly'
+                  ? 'You are on the Pro Monthly plan — unlimited tasks and full insights.'
+                  : plan === 'pro_annual'
+                  ? 'You are on the Pro Annual plan — unlimited tasks and full insights.'
                   : 'You are on the Free plan — up to 25 tasks.'}
               </p>
               {plan === 'free' && (
@@ -176,7 +178,7 @@ export default function SettingsPage() {
                   Upgrade to Pro →
                 </a>
               )}
-              {plan === 'pro' && (
+              {plan !== 'free' && (
                 <span className="inline-block bg-green-50 text-green-700 border border-green-200 px-4 py-1.5 rounded-lg text-sm font-semibold">
                   ✓ Pro
                 </span>
