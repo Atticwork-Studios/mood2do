@@ -24,17 +24,20 @@ export default function SignInPage() {
     setLoading(true)
     setError('')
 
-    if (!isLocalhost && !captchaToken) {
-      setError('Please complete the captcha.')
-      setLoading(false)
+    if (!isLocalhost) {
+      captchaRef.current?.execute()
       return
     }
 
+    await doSignIn(null)
+  }
+
+  async function doSignIn(token: string | null) {
     const supabase = createClient()
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
-      options: { captchaToken: captchaToken ?? undefined },
+      options: { captchaToken: token ?? undefined },
     })
 
     if (error) {
@@ -87,7 +90,8 @@ export default function SignInPage() {
           {!isLocalhost && (
             <HCaptcha
               sitekey={HCAPTCHA_SITE_KEY}
-              onVerify={token => setCaptchaToken(token)}
+              size="invisible"
+              onVerify={token => { setCaptchaToken(token); doSignIn(token) }}
               onExpire={() => setCaptchaToken(null)}
               ref={captchaRef}
             />
