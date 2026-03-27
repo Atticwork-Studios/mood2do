@@ -380,6 +380,8 @@ export default function SettingsPage() {
           </div>
 
         </div>
+
+        <p className="text-xs text-gray-300 mt-8 text-right">v1.0</p>
       </main>
     </>
   )
