@@ -1,5 +1,13 @@
+'use client'
+
 import Link from 'next/link'
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import MarketingNav from '@/app/components/MarketingNav'
+import { createClient } from '@/lib/supabase/client'
+
+const MONTHLY_PRICE_ID = process.env.NEXT_PUBLIC_STRIPE_MONTHLY_PRICE_ID!
+const ANNUAL_PRICE_ID = process.env.NEXT_PUBLIC_STRIPE_ANNUAL_PRICE_ID!
 
 const tiers = [
   {
@@ -9,6 +17,7 @@ const tiers = [
     description: 'Everything you need to get started.',
     cta: 'Start for free',
     href: '/sign-up',
+    priceId: null,
     highlight: false,
     features: [
       'Up to 25 tasks',
@@ -25,8 +34,9 @@ const tiers = [
     price: '£3.99',
     period: 'per month',
     description: 'Unlimited tasks and full insights.',
-    cta: 'Coming soon',
+    cta: 'Get Pro Monthly',
     href: null,
+    priceId: MONTHLY_PRICE_ID,
     highlight: true,
     features: [
       'Unlimited tasks',
@@ -41,8 +51,9 @@ const tiers = [
     price: '£39.99',
     period: 'per year',
     description: 'Best value — save £8 vs monthly.',
-    cta: 'Coming soon',
+    cta: 'Get Pro Annual',
     href: null,
+    priceId: ANNUAL_PRICE_ID,
     highlight: false,
     features: [
       'Unlimited tasks',
@@ -56,6 +67,35 @@ const tiers = [
 ]
 
 export default function PricingPage() {
+  const router = useRouter()
+  const [loading, setLoading] = useState<string | null>(null)
+
+  async function handleCheckout(priceId: string) {
+    setLoading(priceId)
+    const supabase = createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+      router.push('/sign-in?redirect=/pricing')
+      return
+    }
+
+    const res = await fetch('/api/checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ priceId, userId: user.id, email: user.email }),
+    })
+
+    const { url, error } = await res.json()
+    if (error) {
+      alert('Something went wrong. Please try again.')
+      setLoading(null)
+      return
+    }
+
+    window.location.href = url
+  }
+
   return (
     <>
       <MarketingNav />
@@ -111,25 +151,25 @@ export default function PricingPage() {
               {tier.href ? (
                 <Link
                   href={tier.href}
+                  className="text-sm font-semibold text-center py-2.5 rounded-xl transition-opacity hover:opacity-90 text-gray-800 bg-white border border-gray-200 hover:bg-gray-50"
+                >
+                  {tier.cta}
+                </Link>
+              ) : (
+                <button
+                  onClick={() => handleCheckout(tier.priceId!)}
+                  disabled={loading === tier.priceId}
                   className={`text-sm font-semibold text-center py-2.5 rounded-xl transition-opacity hover:opacity-90 ${
                     tier.highlight ? 'text-white' : 'text-gray-800 bg-white border border-gray-200 hover:bg-gray-50'
                   }`}
                   style={tier.highlight ? { background: 'var(--grain-primary)' } : {}}
                 >
-                  {tier.cta}
-                </Link>
-              ) : (
-                <span className="text-sm font-semibold text-center py-2.5 rounded-xl bg-gray-100 text-gray-400 cursor-default">
-                  {tier.cta}
-                </span>
+                  {loading === tier.priceId ? 'Redirecting…' : tier.cta}
+                </button>
               )}
             </div>
           ))}
         </div>
-
-        <p className="text-center text-xs text-gray-400 mt-10">
-          Payments not yet live — sign up free and we&apos;ll be in touch when Pro launches.
-        </p>
       </div>
 
       <footer className="border-t border-gray-100 py-8">
